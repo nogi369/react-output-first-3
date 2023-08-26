@@ -10,8 +10,11 @@ export const TodoList = (props) => {
         <li key={todo.id}>
           <span>{todo.title}</span>
           <FontAwesomeIcon
-          icon={faTrashAlt} size="lg"
-          onClick={() => {handleDeleteTodo(todo.id, todo.title)}}
+            icon={faTrashAlt}
+            size="lg"
+            onClick={() => {
+              handleDeleteTodo(todo.id, todo.title);
+            }}
           />
         </li>
       ))}
