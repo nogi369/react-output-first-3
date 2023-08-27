@@ -10,8 +10,7 @@
  */
 
 export const InputForm = (props) => {
-  const { placeholder, addInputValue, handleChangeValue, handleKeyDown } =
-    props;
+  const { placeholder, inputValue, handleChangeValue, handleKeyDown } = props;
 
   /**
    * 渡ってくるpropsを確認する方法
@@ -21,7 +20,7 @@ export const InputForm = (props) => {
     <input
       type="text"
       placeholder={placeholder}
-      value={addInputValue}
+      value={inputValue}
       onChange={handleChangeValue}
       onKeyDown={handleKeyDown}
     />
