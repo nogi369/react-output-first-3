@@ -3,6 +3,7 @@ import { INIT_TODO_LIST, INIT_UNIQUE_ID } from "../../../constants/data";
 import { TodoList } from "../../organisms/TodoList";
 import { AddTodo } from "../../organisms/AddTodo";
 import { InputForm } from "../../atoms/InputForm";
+import { searchTodo } from "../../../utils/todoLogic";
 
 export const TodoTemplate = () => {
   // Todoリスト
@@ -13,12 +14,19 @@ export const TodoTemplate = () => {
   const [uniqueId, setUniqueId] = useState(INIT_UNIQUE_ID);
   // 検索キーワード
   const [searchKeyword, setSearchKeyword] = useState("");
+  // 表示用Todoリスト
+  const [showTodoList, setShowTodoList] = useState(INIT_TODO_LIST);
+
+  const updateShowTodoList = (newTodoList, Keyword) => {
+    setShowTodoList(
+      Keyword !== "" ? searchTodo(newTodoList, Keyword) : newTodoList,
+    );
+  };
 
   // 入力値の更新処理
   const onChangeAddInputValue = (e) => {
     setAddInputValue(e.target.value);
   };
-  // console.log(addInputValue);
 
   // Todo追加処理
   const handleAddTodo = (e) => {
@@ -26,7 +34,7 @@ export const TodoTemplate = () => {
     if (e.key === "Enter" && addInputValue !== "") {
       const nextUniqueId = uniqueId + 1;
 
-      const newTodo = [
+      const newTodoList = [
         ...originTodoList,
         {
           id: nextUniqueId,
@@ -34,7 +42,9 @@ export const TodoTemplate = () => {
         },
       ];
 
-      setOriginTodoList(newTodo);
+      setOriginTodoList(newTodoList);
+      updateShowTodoList(newTodoList, searchKeyword);
+
       setUniqueId(nextUniqueId);
       setAddInputValue("");
     }
@@ -47,11 +57,15 @@ export const TodoTemplate = () => {
       const newTodoList = originTodoList.filter((todo) => todo.id !== targetId);
 
       setOriginTodoList(newTodoList);
+      updateShowTodoList(newTodoList, searchKeyword);
     }
   };
 
   const handleSearchTodo = (e) => {
-    setSearchKeyword(e.target.value);
+    const Keyword = e.target.value; // 検索キーワードを変数「 Keyword 」として扱えるようにする
+    setSearchKeyword(Keyword);
+
+    updateShowTodoList(originTodoList, Keyword);
   };
 
   return (
@@ -72,10 +86,12 @@ export const TodoTemplate = () => {
         />
       </section>
       <section>
-        <TodoList
-          todoList={originTodoList}
-          handleDeleteTodo={handleDeleteTodo}
-        />
+        {showTodoList.length > 0 && (
+          <TodoList
+            todoList={showTodoList}
+            handleDeleteTodo={handleDeleteTodo}
+          />
+        )}
       </section>
     </div>
   );
