@@ -2,6 +2,7 @@ import { useState } from "react";
 import { INIT_TODO_LIST, INIT_UNIQUE_ID } from "../../../constants/data";
 import { TodoList } from "../../organisms/TodoList";
 import { AddTodo } from "../../organisms/AddTodo";
+import { InputForm } from "../../atoms/InputForm";
 
 export const TodoTemplate = () => {
   // Todoリスト
@@ -10,12 +11,14 @@ export const TodoTemplate = () => {
   const [addInputValue, setAddInputValue] = useState("");
   // 一意のid
   const [uniqueId, setUniqueId] = useState(INIT_UNIQUE_ID);
+  // 検索キーワード
+  const [searchKeyword, setSearchKeyword] = useState("");
 
   // 入力値の更新処理
   const onChangeAddInputValue = (e) => {
     setAddInputValue(e.target.value);
-    console.log(e.target.value);
   };
+  // console.log(addInputValue);
 
   // Todo追加処理
   const handleAddTodo = (e) => {
@@ -47,15 +50,33 @@ export const TodoTemplate = () => {
     }
   };
 
+  const handleSearchTodo = (e) => {
+    setSearchKeyword(e.target.value);
+  };
+
   return (
-    <>
+    <div>
       <h1>Todo List</h1>
-      <AddTodo
-        addInputValue={addInputValue}
-        onChangeTodo={onChangeAddInputValue}
-        handleAddTodo={handleAddTodo}
-      />
-      <TodoList todoList={originTodoList} handleDeleteTodo={handleDeleteTodo} />
-    </>
+      <section>
+        <AddTodo
+          addInputValue={addInputValue}
+          onChangeTodo={onChangeAddInputValue}
+          handleAddTodo={handleAddTodo}
+        />
+      </section>
+      <section>
+        <InputForm
+          handleChangeValue={handleSearchTodo}
+          inputValue={searchKeyword}
+          placeholder={"Search Keyword"}
+        />
+      </section>
+      <section>
+        <TodoList
+          todoList={originTodoList}
+          handleDeleteTodo={handleDeleteTodo}
+        />
+      </section>
+    </div>
   );
 };
