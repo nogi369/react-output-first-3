@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { INIT_TODO_LIST, INIT_UNIQUE_ID } from "../../../constants/data";
 import { TodoList } from "../../organisms/TodoList";
 import { AddTodo } from "../../organisms/AddTodo";
 import { InputForm } from "../../atoms/InputForm";
-import { searchTodo } from "../../../utils/todoLogic";
 
 export const TodoTemplate = () => {
   // Todoリスト
@@ -15,13 +14,21 @@ export const TodoTemplate = () => {
   // 検索キーワード
   const [searchKeyword, setSearchKeyword] = useState("");
   // 表示用Todoリスト
-  const [showTodoList, setShowTodoList] = useState(INIT_TODO_LIST);
-
-  const updateShowTodoList = (newTodoList, Keyword) => {
-    setShowTodoList(
-      Keyword !== "" ? searchTodo(newTodoList, Keyword) : newTodoList,
-    );
-  };
+  const showTodoList = useMemo(() => {
+    return originTodoList.filter((todo) => {
+      // 第1引数 = 検索したい文字, 第2引数 = フラグ
+      const regexp = new RegExp("^" + searchKeyword, "i");
+      return todo.title.match(regexp);
+    });
+  }, [originTodoList, searchKeyword]);
+  /**
+   * useMemo
+   * https://qiita.com/seira/items/42576765aecc9fa6b2f8#%E5%9F%BA%E6%9C%AC%E5%BD%A2
+   * https://ja.legacy.reactjs.org/docs/hooks-reference.html#usememo
+   *
+   * アロー関数 : 関数の本体が一文のとき
+   * https://qiita.com/deBroglieeeen/items/f146afd1cdf1e89c4121#%E3%82%A2%E3%83%AD%E3%83%BC%E9%96%A2%E6%95%B0%E3%81%AE%E5%9F%BA%E6%9C%AC%E3%81%AE%E5%BD%A2
+   */
 
   // 入力値の更新処理
   const onChangeAddInputValue = (e) => {
@@ -43,8 +50,6 @@ export const TodoTemplate = () => {
       ];
 
       setOriginTodoList(newTodoList);
-      updateShowTodoList(newTodoList, searchKeyword);
-
       setUniqueId(nextUniqueId);
       setAddInputValue("");
     }
@@ -57,15 +62,12 @@ export const TodoTemplate = () => {
       const newTodoList = originTodoList.filter((todo) => todo.id !== targetId);
 
       setOriginTodoList(newTodoList);
-      updateShowTodoList(newTodoList, searchKeyword);
     }
   };
 
   const handleSearchTodo = (e) => {
     const Keyword = e.target.value; // 検索キーワードを変数「 Keyword 」として扱えるようにする
     setSearchKeyword(Keyword);
-
-    updateShowTodoList(originTodoList, Keyword);
   };
 
   return (
@@ -96,3 +98,8 @@ export const TodoTemplate = () => {
     </div>
   );
 };
+
+// useMemoの第二引数([originTodoList, searchKeyword])に依存して処理が実行される
+// originTodoListとsearchKeywordの値が変更される度にfilterの検索処理を実行
+// ただし結果が前回と同じならキャッシュを返却し処理は実行されない(無駄な処理を省いている)
+// 詳しくはuseMemoを調べてください。
