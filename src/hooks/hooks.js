@@ -36,7 +36,7 @@ export const useTodo = () => {
     setAddInputValue(e.target.value);
   };
 
-  // Todo追加処理
+  // 新規登録処理
   const handleAddTodo = (e) => {
     // Enterキーが押された かつ 入力値が空文字でないこと
     if (e.key === "Enter" && addInputValue !== "") {
@@ -56,7 +56,7 @@ export const useTodo = () => {
     }
   };
 
-  // Todo削除処理
+  // 削除処理
   const handleDeleteTodo = (targetId, targetTitle) => {
     // 「OK」時の処理開始 ＋ 確認ダイアログの表示
     if (window.confirm(`「${targetTitle}」のtodoを削除しますか？`)) {
@@ -66,6 +66,7 @@ export const useTodo = () => {
     }
   };
 
+  // 検索処理
   const handleChangeSearchKeyword = (e) => setSearchKeyword(e.target.value);
 
   const states = {
