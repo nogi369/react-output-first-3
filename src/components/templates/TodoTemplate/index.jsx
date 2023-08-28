@@ -3,6 +3,7 @@ import { INIT_TODO_LIST, INIT_UNIQUE_ID } from "../../../constants/data";
 import { TodoList } from "../../organisms/TodoList";
 import { AddTodo } from "../../organisms/AddTodo";
 import { InputForm } from "../../atoms/InputForm";
+import styles from "./styles.module.css";
 
 export const TodoTemplate = () => {
   // Todoリスト
@@ -25,6 +26,10 @@ export const TodoTemplate = () => {
    * useMemo
    * https://qiita.com/seira/items/42576765aecc9fa6b2f8#%E5%9F%BA%E6%9C%AC%E5%BD%A2
    * https://ja.legacy.reactjs.org/docs/hooks-reference.html#usememo
+   *
+   * useMemoの第二引数([originTodoList, searchKeyword])に依存して処理が実行される
+   * originTodoListとsearchKeywordの値が変更される度にfilterの検索処理を実行
+   * ただし結果が前回と同じならキャッシュを返却し処理は実行されない(無駄な処理を省いている)
    *
    * アロー関数 : 関数の本体が一文のとき
    * https://qiita.com/deBroglieeeen/items/f146afd1cdf1e89c4121#%E3%82%A2%E3%83%AD%E3%83%BC%E9%96%A2%E6%95%B0%E3%81%AE%E5%9F%BA%E6%9C%AC%E3%81%AE%E5%BD%A2
@@ -71,23 +76,23 @@ export const TodoTemplate = () => {
   };
 
   return (
-    <div>
-      <h1>Todo List</h1>
-      <section>
+    <div className={styles.container}>
+      <h1 className={styles.title}>Todo List</h1>
+      <section className={styles.common}>
         <AddTodo
           addInputValue={addInputValue}
           onChangeTodo={onChangeAddInputValue}
           handleAddTodo={handleAddTodo}
         />
       </section>
-      <section>
+      <section className={styles.common}>
         <InputForm
           handleChangeValue={handleSearchTodo}
           inputValue={searchKeyword}
           placeholder={"Search Keyword"}
         />
       </section>
-      <section>
+      <section className={styles.common}>
         {showTodoList.length > 0 && (
           <TodoList
             todoList={showTodoList}
@@ -98,8 +103,3 @@ export const TodoTemplate = () => {
     </div>
   );
 };
-
-// useMemoの第二引数([originTodoList, searchKeyword])に依存して処理が実行される
-// originTodoListとsearchKeywordの値が変更される度にfilterの検索処理を実行
-// ただし結果が前回と同じならキャッシュを返却し処理は実行されない(無駄な処理を省いている)
-// 詳しくはuseMemoを調べてください。

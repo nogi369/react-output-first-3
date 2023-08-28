@@ -1,3 +1,5 @@
+import styles from "./styles.module.css";
+
 /**
  * type, placeholder, value
  * 確認方法: DevToolsのElementタブ
@@ -18,6 +20,7 @@ export const InputForm = (props) => {
    */
   return (
     <input
+      className={styles.input}
       type="text"
       placeholder={placeholder}
       value={inputValue}
