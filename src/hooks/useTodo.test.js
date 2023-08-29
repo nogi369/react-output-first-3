@@ -26,7 +26,8 @@ describe("【hooksテスト】useApp test", () => {
     });
   });
   describe("【関数テスト】handleAddTodo", () => {
-    // let : https://qiita.com/cheez921/items/7b57835cb76e70dd0fc4#%E5%86%8D%E4%BB%A3%E5%85%A5
+    // let : test関数ブロックで値の再代入が行われるため、変数をletで宣言する
+    // https://qiita.com/cheez921/items/7b57835cb76e70dd0fc4#%E5%86%8D%E4%BB%A3%E5%85%A5
 
     // 予測値(期待値)
     let expectTodoList = [];
@@ -67,6 +68,29 @@ describe("【hooksテスト】useApp test", () => {
       // 新規データ追加時、入力フォームを空にする
       expect(result.current[0].addInputValue).toBe("");
     });
+    test("【正常系】エンターキーを押していない場合、処理が発生しないこと", () => {
+      const expectTodoTitle = "Todo4";
+      expectTodoList = INIT_TODO_LIST.concat({
+        id: 3,
+        title: expectTodoTitle,
+      });
+      eventObject.target.value = expectTodoTitle; // ***
+      eventObject.key = "";
+      // hooks呼び出し
+      const { result } = renderHook(() => useTodo());
+      // hooks関数の実行「前」
+      expect(result.current[0].addInputValue).toBe("");
+      // hooks関数の実行(onChangeAddInputValue)
+      act(() => result.current[1].onChangeAddInputValue(eventObject));
+      // 結果判定
+      expect(result.current[0].addInputValue).toBe(expectTodoTitle);
+      // hooks関数の実行(handleAddTodo)
+      act(() => result.current[1].handleAddTodo(eventObject));
+      // 表示用Todoリストが更新されない
+      expect(result.current[0].showTodoList).not.toEqual(expectTodoList);
+      // 入力値がリセットされない
+      expect(result.current[0].addInputValue).not.toBe(""); // ***
+    });
   });
 });
 
@@ -77,7 +101,7 @@ describe("【hooksテスト】useApp test", () => {
 // データ作成に伴う各種更新処理
 
 /**
- * テストケース
+ * ＜テストケース＞
  *
  * (自分)
  * 新規データを作成できること
@@ -90,12 +114,31 @@ describe("【hooksテスト】useApp test", () => {
  * 入力値がない場合、処理が発生しないこと(異)
  *
  *
- * テストケース掘り下げ
+ * ＜テストケース掘り下げ＞
+ *
+ * todoList, uniqueIdが更新されること、addInputValueがリセットされること( TC: 1 )
  *
  * (自分の思考)
- * todoList, uniqueIdが更新されること、addInputValueがリセットされること
  * => todoList = 配列, uniqueId = id を用意する必要がありそう・・・
  *
  * (サンプル)
+ * データ用意: 予測値(期待値) = 配列、引数 = オブジェクト
+ * 引数を初期化
+ * 用意したデータを編集する
+ * カスタムフック呼び出し
+ * テスト実行
  *
+ *
+ * エンターキーを押していない場合、処理が発生しないこと( TC: 2 )
+ *
+ * (自分の思考)
+ * 新規データ定義(必要なもの)
+ * eventObject.key = ""(期待する結果)
+ * エンターキーを押していない場合の定義が分からない
+ *
+ * (サンプル)
+ * フォームに入力したTodoタイトルで更新されること
+ * 表示用TodoListが予想通り更新されないこと
+ * 入力値(addInputValue)がリセットされない
+ * 
  */
