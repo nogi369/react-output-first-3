@@ -91,6 +91,21 @@ describe("【hooksテスト】useApp test", () => {
       // 入力値がリセットされない
       expect(result.current[0].addInputValue).not.toBe(""); // ***
     });
+    test("【正常系】入力値がない場合、処理が発生しないこと", () => {
+      const expectTodoTitle = "Todo5";
+      expectTodoList = INIT_TODO_LIST.concat({
+        id: 3,
+        title: expectTodoTitle,
+      });
+      eventObject.target.value = ""; //入力値が空
+      eventObject.key = ""; // 「Enterキーが押されない」ことも入力値に含む
+      const { result } = renderHook(() => useTodo());
+      expect(result.current[0].addInputValue).toBe("");
+      act(() => result.current[1].onChangeAddInputValue(eventObject));
+      expect(result.current[0].addInputValue).toBe(""); // 入力値の変更なし
+      act(() => result.current[1].handleAddTodo(eventObject));
+      expect(result.current[0].showTodoList).not.toEqual(expectTodoList);
+    });
   });
 });
 
@@ -140,5 +155,19 @@ describe("【hooksテスト】useApp test", () => {
  * フォームに入力したTodoタイトルで更新されること
  * 表示用TodoListが予想通り更新されないこと
  * 入力値(addInputValue)がリセットされない
- * 
+ *
+ *
+ * 入力値がない場合、処理が発生しないこと( TC: 3 )
+ * (自分の思考)
+ * 「入力値がない場合」の定義どうすればいいのだろうか？
+ *
+ *
+ * (サンプル)
+ * eventObject.target.value = ""; //入力値が空
+ * eventObject.key = ""; // 「Enterキーが押されない」ことも入力値に含む
+ * expect(result.current[0].addInputValue).toBe(""); // onChangeAddInputValueのテストで確かめてるので、handleAddTodoのテストでは記述不要
+ *
+ *
+ * (自分の思考)
+ * (サンプル)
  */
