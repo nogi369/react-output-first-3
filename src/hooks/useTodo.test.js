@@ -113,12 +113,23 @@ describe("【hooksテスト】useApp test", () => {
     beforeEach(() => {
       expectTodoList = [];
     });
+    // confirmでをOKクリックした場合
     test("【正常系】todoが削除されること", () => {
       const targetId = 1;
       const targetTitle = "テスト";
       // Jestのmock使い方(https://stackoverflow.com/questions/41732903/stubbing-window-functions-in-jest#:~:text=I%20just%20used%20Jest%20mock%20and%20it%20works%20for%20me%20%3A)
       window.confirm = vi.fn().mockReturnValueOnce(true);
       expectTodoList = INIT_TODO_LIST.filter((todo) => todo.id !== targetId);
+      const { result } = renderHook(() => useTodo());
+      act(() => result.current[1].handleDeleteTodo(targetId, targetTitle));
+      expect(result.current[0].showTodoList).toEqual(expectTodoList);
+    });
+    // TC1の反対
+    test("【正常系】confirmでキャンセルをクリックした場合、todoが削除されないこと", () => {
+      const targetId = 1;
+      const targetTitle = "テスト";
+      window.confirm = vi.fn().mockReturnValueOnce(false);
+      expectTodoList = INIT_TODO_LIST;
       const { result } = renderHook(() => useTodo());
       act(() => result.current[1].handleDeleteTodo(targetId, targetTitle));
       expect(result.current[0].showTodoList).toEqual(expectTodoList);
@@ -241,6 +252,19 @@ describe("【hooksテスト】useApp test", () => {
  * テスト実行
  * handleDeleteTodoに渡すのは、テストブロックで定義した(targetId, targetTitle)
  * 「表示用TodoListが予想通り更新されないこと」を確認する(テストで確認すること)
+ *
+ *
+ * confirmでキャンセルをクリックした場合、todoが削除されないこと( TC: 2 )
+ * (自分の思考)
+ * 操作の観点から、"【正常系】todoが削除されること"の逆のコードを定義すればいいと思っていた
+ * => 配列の確認はfilterしていないnewTodoListとshowTodoListを突き合わせて一致しないことを確かめればいいと思っていた
+ *
+ * (サンプル)
+ * 比較用の配列:expectTodoListには、通常の配列: INIT_TODO_LISTを指定すれば良かった(filterは不要)
+ *
+ * (感じたこと)
+ * 基本的に使わなくて済むのなら、「 .not.toEqual 」は使わない
+ *
  *
  *
  * (自分の思考)
