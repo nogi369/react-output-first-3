@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { useTodo } from "./useTodo";
 import { act } from "react-dom/test-utils";
 import { INIT_TODO_LIST } from "../constants/data";
@@ -63,7 +63,7 @@ describe("【hooksテスト】useApp test", () => {
       expect(result.current[0].addInputValue).toBe(expectTodoTitle);
       // hooks関数の実行(handleAddTodo)
       act(() => result.current[1].handleAddTodo(eventObject));
-      // test関数内に定義したTodoデータを含むTodoリストにshowTodoList(useMemo)の処理で更新する
+      // showTodoList(表示用Todoリスト)で表示するリストが、test関数内に定義したTodoデータを含むTodoリストになっていること
       expect(result.current[0].showTodoList).toEqual(expectTodoList);
       // 新規データ追加時、入力フォームを空にする
       expect(result.current[0].addInputValue).toBe("");
@@ -74,8 +74,8 @@ describe("【hooksテスト】useApp test", () => {
         id: 3,
         title: expectTodoTitle,
       });
-      eventObject.target.value = expectTodoTitle; // ***
-      eventObject.key = "";
+      eventObject.target.value = expectTodoTitle; // expectTodoTitleをテスト関数内で使えるようにする
+      eventObject.key = ""; // 「Enterキーが押していない」
       // hooks呼び出し
       const { result } = renderHook(() => useTodo());
       // hooks関数の実行「前」
@@ -98,7 +98,7 @@ describe("【hooksテスト】useApp test", () => {
         title: expectTodoTitle,
       });
       eventObject.target.value = ""; //入力値が空
-      eventObject.key = ""; // 「Enterキーが押されない」ことも入力値に含む
+      eventObject.key = ""; // 「Enterキーを押していない」ことも入力値に含む
       const { result } = renderHook(() => useTodo());
       expect(result.current[0].addInputValue).toBe("");
       act(() => result.current[1].onChangeAddInputValue(eventObject));
@@ -107,7 +107,45 @@ describe("【hooksテスト】useApp test", () => {
       expect(result.current[0].showTodoList).not.toEqual(expectTodoList);
     });
   });
+  describe("【関数テスト】handleDeleteTodo", () => {
+    // 予測値(期待値)
+    let expectTodoList = [];
+    beforeEach(() => {
+      expectTodoList = [];
+    });
+    test("【正常系】todoが削除されること", () => {
+      const targetId = 1;
+      const targetTitle = "テスト";
+      // Jestのmock使い方(https://stackoverflow.com/questions/41732903/stubbing-window-functions-in-jest#:~:text=I%20just%20used%20Jest%20mock%20and%20it%20works%20for%20me%20%3A)
+      window.confirm = vi.fn().mockReturnValueOnce(true);
+      expectTodoList = INIT_TODO_LIST.filter((todo) => todo.id !== targetId);
+      const { result } = renderHook(() => useTodo());
+      act(() => result.current[1].handleDeleteTodo(targetId, targetTitle));
+      expect(result.current[0].showTodoList).toEqual(expectTodoList);
+    });
+  });
 });
+
+/**
+ * ＜テスト流れ＞
+ * データ用意: 予測値(期待値) = 配列、引数 = オブジェクト
+ * 引数を初期化
+ * 用意したデータを編集する
+ * カスタムフック呼び出し
+ * テスト実行
+ */
+
+/**
+ * ＜ TC: 削除 ＞
+ * (自解)
+ * targetId, targetTitleが渡ってきたとき、Todoが削除されること
+ * confirmモーダルで「 OK 」を押した場合、Todoが削除されること
+ * todoListが更新されること
+ * (サンプル)
+ * todoが削除されること
+ * confirmでキャンセルをクリックした場合、todoが削除されないこと
+ * "検索キーワードがある場合" TODO: 確認: 検索結果でshowTodoListが更新されること (showTodoListへもTodo削除処理の結果が反映されること)
+ */
 
 // 最初にデータを用意する
 // 文字入力を受け付ける(◯)
@@ -127,7 +165,7 @@ describe("【hooksテスト】useApp test", () => {
  * todoList, uniqueIdが更新されること、addInputValueがリセットされること(正)
  * エンターキーを押していない場合、処理が発生しないこと(異)
  * 入力値がない場合、処理が発生しないこと(異)
- *
+ * "検索キーワードがある場合" TODO: 確認1: 検索結果でshowTodoListが更新されること
  *
  * ＜テストケース掘り下げ＞
  *
@@ -166,6 +204,43 @@ describe("【hooksテスト】useApp test", () => {
  * eventObject.target.value = ""; //入力値が空
  * eventObject.key = ""; // 「Enterキーが押されない」ことも入力値に含む
  * expect(result.current[0].addInputValue).toBe(""); // onChangeAddInputValueのテストで確かめてるので、handleAddTodoのテストでは記述不要
+ *
+ *
+ * 削除TC
+ *
+ * (自分の思考)
+ * Todoが削除できること
+ * confirmモーダルでキャンセルしたとき、Todoが削除できないこと
+ *
+ * (サンプル)
+ * todoが削除されること
+ * confirmでキャンセルをクリックした場合、todoが削除されないこと
+ *
+ * (感じたこと)
+ * サンプルのTCの方が、より具体的なものとなっている
+ *
+ *
+ * todoが削除されること( TC: 1 )
+ * (自分の思考)
+ * 配列を用意
+ * わからないこと
+ * hooks関数に引数として渡す値は(eventObject? clickイベント？)
+ * Todoを削除するのに、入力値は要らないはず
+ *
+ * (サンプル)
+ * 用意ブロック
+ * 予測値(配列)を用意
+ * 予測値(配列)の初期化
+ *
+ * testブロック
+ * targetId
+ * targetTitle
+ * window.confirmをモック化(mock: https://qiita.com/Fudeko/items/301f8a80963dfcaafb80#mock%E3%81%A8%E3%81%AF)
+ * expectTodoListに削除対象のidをフィルターしたINIT_TODO_LISTを代入
+ * hooks呼び出し
+ * テスト実行
+ * handleDeleteTodoに渡すのは、テストブロックで定義した(targetId, targetTitle)
+ * 「表示用TodoListが予想通り更新されないこと」を確認する(テストで確認すること)
  *
  *
  * (自分の思考)
