@@ -113,7 +113,7 @@ describe("【hooksテスト】useApp test", () => {
     beforeEach(() => {
       expectTodoList = [];
     });
-    // confirmでをOKクリックした場合
+    // confirmでOKクリックした場合
     test("【正常系】todoが削除されること", () => {
       const targetId = 1;
       const targetTitle = "テスト";
@@ -138,7 +138,7 @@ describe("【hooksテスト】useApp test", () => {
   describe("【関数テスト】handleChangeSearchKeyword", () => {
     test("【正常系】検索ワードがある場合、検索された結果が反映される", () => {
       // 予測値(期待値)
-      const expectValue = [INIT_TODO_LIST[0]]; // Listが被り、ややこしくならないように「 expectValue 」と変数名にしている
+      const expectValue = [INIT_TODO_LIST[0]]; // Listどうしが被り、ややこしくならないように「 expectValue 」という変数名にしている
       // 引数
       const eventObject = {
         target: {
